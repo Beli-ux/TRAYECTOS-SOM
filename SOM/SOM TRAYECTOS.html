@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SOM</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .card {
+      transition: transform 0.3s ease;
+    }
+    .card:hover {
+      transform: scale(1.02);
+    }
+    .car-img {
+      width: 100px;
+      transition: transform 0.5s ease;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .flipped {
+      transform: translateX(10px) scaleX(-1);
+    }
+    .bubble {
+      background: #f3f4f6;
+      border-radius: 1rem;
+      padding: 0.5rem 1rem;
+      margin-top: 0.5rem;
+      display: inline-block;
+      font-size: 0.9rem;
+      color: #374151;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-gray-100 via-blue-50 to-purple-100 min-h-screen p-6 font-sans">
+  <h1 class="text-4xl font-bold text-center text-purple-600 mb-8">SOM</h1>
+  <div id="container" class="space-y-6"></div>
+
+  <script>
+    const startDate = new Date("2025-11-09");
+    const endDate = new Date("2026-05-31");
+    const container = document.getElementById("container");
+
+    function getDomingos() {
+      const domingos = [];
+      for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+        if (d.getDay() === 0) {
+          domingos.push(new Date(d));
+        }
+      }
+      return domingos;
+    }
+
+    function formatDate(date) {
+      return date.toLocaleDateString("es-ES", {
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      });
+    }
+
+    const domingos = getDomingos();
+
+    domingos.forEach((fecha, index) => {
+      const isAIda = index % 2 === 0;
+
+      const card = document.createElement("div");
+      card.className = "card bg-white shadow-lg rounded-2xl p-6 flex flex-col items-center gap-4";
+
+      const dateBlock = document.createElement("div");
+      dateBlock.innerHTML = `<p class="text-lg font-semibold text-gray-700">${formatDate(fecha)}</p>`;
+
+      const familyA = document.createElement("div");
+      familyA.className = "flex flex-col items-center";
+      const imgA = document.createElement("img");
+      imgA.src = "bmw.png";
+      imgA.className = "car-img";
+      const bubbleA = document.createElement("div");
+      bubbleA.className = "bubble";
+      bubbleA.textContent = isAIda ? "9:00 IDA" : "14:30 VUELTA";
+      familyA.appendChild(imgA);
+      familyA.appendChild(bubbleA);
+
+      const familyB = document.createElement("div");
+      familyB.className = "flex flex-col items-center";
+      const imgB = document.createElement("img");
+      imgB.src = "mini.png";
+      imgB.className = "car-img";
+      const bubbleB = document.createElement("div");
+      bubbleB.className = "bubble";
+      bubbleB.textContent = isAIda ? "14:30 VUELTA" : "9:00 IDA";
+      familyB.appendChild(imgB);
+      familyB.appendChild(bubbleB);
+
+      const carContainer = document.createElement("div");
+      carContainer.className = "flex flex-col md:flex-row items-center justify-center gap-6";
+      const idaFirst = bubbleA.textContent.includes("IDA") ? [familyA, familyB] : [familyB, familyA];
+      idaFirst.forEach(f => carContainer.appendChild(f));
+
+      const buttonSwap = document.createElement("button");
+      buttonSwap.textContent = "Cambiar trayecto";
+      buttonSwap.className = "bg-purple-500 text-white px-4 py-2 rounded-full hover:bg-purple-600 transition";
+      buttonSwap.onclick = () => {
+        const temp = bubbleA.textContent;
+        bubbleA.textContent = bubbleB.textContent;
+        bubbleB.textContent = temp;
+        imgA.classList.toggle("flipped");
+        imgB.classList.toggle("flipped");
+        buttonSwap.textContent = "✅ Turno cambiado";
+
+        // Reordenar visualmente
+        carContainer.innerHTML = "";
+        const newOrder = bubbleA.textContent.includes("IDA") ? [familyA, familyB] : [familyB, familyA];
+        newOrder.forEach(f => carContainer.appendChild(f));
+      };
+
+      const buttonWhatsApp = document.createElement("button");
+      buttonWhatsApp.textContent = "Enviar confirmación por WhatsApp";
+      buttonWhatsApp.className = "bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600 transition";
+      buttonWhatsApp.onclick = () => {
+        const mensaje = `SOM - Confirmación de trayecto\n${formatDate(fecha)}\nFamilia A: ${bubbleA.textContent}\nFamilia B: ${bubbleB.textContent}`;
+        const url = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
+        window.open(url, "_blank");
+      };
+
+      card.appendChild(dateBlock);
+      card.appendChild(carContainer);
+      card.appendChild(buttonSwap);
+      card.appendChild(buttonWhatsApp);
+      container.appendChild(card);
+    });
+  </script>
+</body>
+</html>
